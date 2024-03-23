@@ -1,4 +1,3 @@
-from bs4 import BeautifulSoup
 import requests
 import time
 import base64
@@ -17,26 +16,28 @@ headers = {
 query = 'car side view'
 url = f'https://www.google.com/search?q={query}&udm=2&tbm=isch'
 
+def scroll_page():
+    driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.END)
+
 def fetch_images(max_images = 10):
     image_urls = []
     image_count = 0
     driver.get(url)
 
     while image_count < max_images:
-        driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.END)
-        # time.sleep(1)
-        soup = BeautifulSoup(driver.page_source, 'html.parser')
-        image_count = len(soup.select('img.rg_i'))
+        scroll_page()
+        time.sleep(1)
 
-    result = soup.select('img.rg_i')[:max_images]
+        image_count = len(driver.find_elements(By.CLASS_NAME, 'rg_i'))
+
+    result = driver.find_elements(By.CLASS_NAME, 'rg_i')
     for img in result:
-        src = img.get('src')
-        print(src)
-        if src:
+        src = img.get_attribute('src')
+        if src is not None:
             image_urls.append(src)
             if len(image_urls) >= max_images:
                 break
-
+    
     driver.quit()
     return image_urls
 
@@ -55,6 +56,6 @@ def download_images(images_urls):
                 file.write(plain_data)
                 save_images+=1
 
+
 img_urls = fetch_images(100)
-print(len(img_urls))
 download_images(img_urls)
