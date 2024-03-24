@@ -19,7 +19,7 @@ QUERY = 'car side view'
 URL = f'https://www.google.com/search?q={QUERY}&udm=2&tbm=isch'
 SAVE_PATH = 'images/image'
 MAX_IMAGES = 500
-wait = WebDriverWait(driver, 5)
+wait = WebDriverWait(driver, 6)
 
 def scroll_page():
     driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.END)
@@ -28,6 +28,7 @@ def fetch_images(max_images = 10):
     elements = []
     image_urls = []
     driver.get(URL)
+    index = 0
 
     while len(elements) < max_images:
         scroll_page()
@@ -41,9 +42,13 @@ def fetch_images(max_images = 10):
             element.click()
             img = wait.until(EC.visibility_of_element_located((By.CLASS_NAME, 'iPVvYb' if 'iPVvYb' else 'sFlh5c')))
             image_urls.append(img.get_attribute('src'))
+            download_image(img.get_attribute('src'), index)
+            index+=1
             continue
         except:
             image_urls.append(element.get_attribute('src'))
+            download_image(element.get_attribute('src'), index)
+            index+=1
             continue
     
     driver.quit()
@@ -66,4 +71,3 @@ def download_images(images_urls):
         download_image(src, index)
 
 img_urls = fetch_images(MAX_IMAGES)
-download_images(img_urls)
