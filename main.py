@@ -20,42 +20,44 @@ def scroll_page():
     driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.END)
 
 def fetch_images(max_images = 10):
+    filtered_images = []
     image_urls = []
-    image_count = 0
     driver.get(url)
 
-    while image_count < max_images:
+    while len(filtered_images) < max_images:
         scroll_page()
         time.sleep(1)
 
-        image_count = len(driver.find_elements(By.CLASS_NAME, 'rg_i'))
-
-    result = driver.find_elements(By.CLASS_NAME, 'rg_i')
-    for img in result:
-        src = img.get_attribute('src')
-        if src is not None:
-            image_urls.append(src)
-            if len(image_urls) >= max_images:
-                break
+        all_image = driver.find_elements(By.CLASS_NAME, 'rg_i')
+        for img in all_image:
+            if img.get_attribute('src') is not None:
+                filtered_images.append(img)
+    
+    for img in all_image:
+        image_urls.append(img.get_attribute('src'))
+        if len(image_urls) >= max_images:
+            break
     
     driver.quit()
     return image_urls
 
 def download_images(images_urls):
     save_images = 0
+    save_path = 'images/image'
 
     while save_images < len(images_urls):
         src = images_urls[save_images]
-        if src and ',' in src:
-            head, data = src.split(',', 1)
-            file_ext = '.' + head.split(';')[0].split('/')[1]
-            plain_data = base64.b64decode(data)
-            save_path = 'images/image'
 
-            with open(save_path + str(save_images) + file_ext, "wb") as file:
+        with open(save_path + str(save_images) + '.jpg', "wb") as file:
+            if src.startswith('https'):
+                img = requests.get(src)
+                file.write(img.content)
+
+            elif src.startswith('data:image'):
+                data = src.split(',', 1)[-1]
+                plain_data = base64.b64decode(data)
                 file.write(plain_data)
-                save_images+=1
+            save_images+=1
 
-
-img_urls = fetch_images(100)
+img_urls = fetch_images(50)
 download_images(img_urls)
