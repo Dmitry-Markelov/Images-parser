@@ -36,7 +36,7 @@ def fetch_images(max_images = 10):
             break
         try:
             element.click()
-            time.sleep(0.5)
+            time.sleep(1)
             img = driver.find_element(By.CLASS_NAME, 'iPVvYb' if 'iPVvYb' else 'sFlh5c')
             image_urls.append(img.get_attribute('src'))
             continue
@@ -63,6 +63,7 @@ def download_images(images_urls):
                 data = src.split(',', 1)[-1]
                 plain_data = base64.b64decode(data)
                 file.write(plain_data)
+            else: continue
             save_images+=1
 
 img_urls = fetch_images(505)
