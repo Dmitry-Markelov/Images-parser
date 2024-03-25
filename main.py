@@ -8,6 +8,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.keys import Keys 
 
 
 HEADERS = {
@@ -18,33 +19,31 @@ driver = webdriver.Chrome()
 QUERY = 'car side view'
 URL = f'https://www.google.com/search?q={QUERY}&udm=2&tbm=isch'
 SAVE_PATH = 'images/image'
-MAX_IMAGES = 500
+MAX_IMAGES = 50
 wait = WebDriverWait(driver, 5)
 
 def scroll_page():
     driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.END)
 
 def fetch_images(max_images = 10):
-    elements = []
+    filtered_images = []
     image_urls = []
     driver.get(URL)
 
-    while len(elements) < max_images:
+    while len(filtered_images) < max_images:
         scroll_page()
         time.sleep(1)
-        elements = driver.find_elements(By.CLASS_NAME, 'rg_i')
 
-    for element in elements:
+        elements = driver.find_elements(By.CLASS_NAME, 'rg_i')
+        
+        for img in elements:
+            if img.get_attribute('src') is not None:
+                filtered_images.append(img)
+    
+    for img in elements:
+        image_urls.append(img.get_attribute('src'))
         if len(image_urls) >= max_images:
             break
-        try:
-            element.click()
-            img = wait.until(EC.visibility_of_element_located((By.CLASS_NAME, 'iPVvYb' if 'iPVvYb' else 'sFlh5c')))
-            image_urls.append(img.get_attribute('src'))
-            continue
-        except:
-            image_urls.append(element.get_attribute('src'))
-            continue
     
     driver.quit()
     return image_urls
@@ -66,4 +65,5 @@ def download_images(images_urls):
         download_image(src, index)
 
 img_urls = fetch_images(MAX_IMAGES)
+print(len(img_urls))
 download_images(img_urls)
