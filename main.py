@@ -22,7 +22,10 @@ MAX_IMAGES = 500
 wait = WebDriverWait(driver, 5)
 
 def scroll_page():
-    driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.END)
+    try:
+        driver.find_element(By.CLASS_NAME, 'LZ4I').click() #кнопка "Ещё результаты"
+    except:
+        driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.END)
 
 def fetch_images(max_images = 10):
     elements = []
