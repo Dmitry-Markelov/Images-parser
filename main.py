@@ -14,11 +14,11 @@ HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
 }
 
-driver = webdriver.Chrome()
+driver = webdriver.Firefox()
 QUERY = 'car side view'
 URL = f'https://www.google.com/search?q={QUERY}&udm=2&tbm=isch'
 SAVE_PATH = 'images/image'
-MAX_IMAGES = 500
+MAX_IMAGES = 20
 wait = WebDriverWait(driver, 5)
 
 def scroll_page():
@@ -26,6 +26,8 @@ def scroll_page():
         driver.find_element(By.CLASS_NAME, 'LZ4I').click() #кнопка "Ещё результаты"
     except:
         driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.END)
+
+# def download_similar():
 
 def fetch_images(max_images = 10):
     elements = []
@@ -44,6 +46,21 @@ def fetch_images(max_images = 10):
             element.click()
             img = wait.until(EC.visibility_of_element_located((By.CLASS_NAME, 'iPVvYb' if 'iPVvYb' else 'sFlh5c')))
             image_urls.append(img.get_attribute('src'))
+
+            div_element = driver.find_element(By.CLASS_NAME, 'FUJHTc')
+            similar_img = div_element.find_elements(By.CLASS_NAME, 'rg_i')
+            # for test in similar_img:
+            for i in range(0, 2):
+                try:
+                    similar_img[i].click()
+                    time.sleep(2)
+                    test1 = wait.until(EC.visibility_of_element_located((By.CLASS_NAME, 'iPVvYb' if 'iPVvYb' else 'sFlh5c')))
+                    image_urls.append(test1.get_attribute('src'))
+                    driver.execute_script("window.history.go(-1)")
+                    time.sleep(2)
+                except:
+                    continue
+                # break
             continue
         except:
             image_urls.append(element.get_attribute('src'))
@@ -69,4 +86,5 @@ def download_images(images_urls):
         download_image(src, index)
 
 img_urls = fetch_images(MAX_IMAGES)
-download_images(img_urls)
+print(img_urls)
+# download_images(img_urls)
