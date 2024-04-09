@@ -27,14 +27,12 @@ def scroll_page():
     except:
         driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.END)
 
-# def download_similar():
-
 def fetch_images(max_images = 10):
     elements = []
     image_urls = []
     driver.get(URL)
 
-    while len(elements) < max_images:
+    while len(elements) < max_images/3:
         scroll_page()
         time.sleep(1)
         elements = driver.find_elements(By.CLASS_NAME, 'rg_i')
@@ -44,26 +42,32 @@ def fetch_images(max_images = 10):
             break
         try:
             element.click()
+            time.sleep(1)
             img = wait.until(EC.visibility_of_element_located((By.CLASS_NAME, 'iPVvYb' if 'iPVvYb' else 'sFlh5c')))
-            image_urls.append(img.get_attribute('src'))
+            src = img.get_attribute('src')
+            if src not in image_urls:
+                image_urls.append(src)
 
             div_element = driver.find_element(By.CLASS_NAME, 'FUJHTc')
             similar_img = div_element.find_elements(By.CLASS_NAME, 'rg_i')
-            # for test in similar_img:
-            for i in range(0, 2):
+            similar_img[0].click()
+            button = wait.until(EC.visibility_of_element_located((By.XPATH, "(//button[contains(@class, 'iM6qI')])[2]")))
+            for i in range(0, len(similar_img)):
                 try:
-                    similar_img[i].click()
-                    time.sleep(2)
+                    button.click()
+
                     test1 = wait.until(EC.visibility_of_element_located((By.CLASS_NAME, 'iPVvYb' if 'iPVvYb' else 'sFlh5c')))
-                    image_urls.append(test1.get_attribute('src'))
-                    driver.execute_script("window.history.go(-1)")
-                    time.sleep(2)
-                except:
+                    src = test1.get_attribute('src')
+                    if src not in image_urls:
+                        image_urls.append(src)
+
+                except Exception as e:
+                    print("Error:", e)
                     continue
-                # break
-            continue
         except:
-            image_urls.append(element.get_attribute('src'))
+            src = element.get_attribute('src')
+            if src not in image_urls:
+                image_urls.append(src)
             continue
     
     driver.quit()
@@ -87,4 +91,4 @@ def download_images(images_urls):
 
 img_urls = fetch_images(MAX_IMAGES)
 print(img_urls)
-# download_images(img_urls)
+download_images(img_urls)
