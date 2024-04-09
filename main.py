@@ -1,3 +1,4 @@
+import os
 import requests
 import time
 import base64
@@ -28,6 +29,9 @@ MAX_IMAGES = 1000
 
 # ожидание загрузки
 wait = WebDriverWait(driver, 5)
+
+if not os.path.exists('images'):
+    os.makedirs('images') # создание папки с результатами
 
 def scroll_page():
     try:
