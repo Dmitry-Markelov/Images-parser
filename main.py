@@ -24,10 +24,10 @@ URL = f'https://www.google.com/search?q={QUERY}&udm=2&tbm=isch'
 SAVE_PATH = 'images/image'
 
 # максимальное количество изображений для загрузки
-MAX_IMAGES = 20
+MAX_IMAGES = 1000
 
 # ожидание загрузки
-wait = WebDriverWait(driver, 5)
+wait = WebDriverWait(driver, 1)
 
 def scroll_page():
     try:
@@ -41,10 +41,11 @@ def fetch_images(max_images = 10):
     driver.get(URL)
     index = 0
 
-    def add_src(element = None): # поиск картинки и проверка на существующий src
-        if not element:
-            img = wait.until(EC.visibility_of_element_located((By.CLASS_NAME, 'iPVvYb' if 'iPVvYb' else 'sFlh5c'))) # ожидание прогрузки изображения
-        else: img = element
+    def add_src(): # поиск картинки и проверка на существующий src
+        try:
+            img = wait.until(EC.visibility_of_element_located((By.CLASS_NAME, 'iPVvYb')))
+        except:
+            img = driver.find_element(By.CLASS_NAME, 'sFlh5c')
         src = img.get_attribute('src')
         if src not in image_urls:
             image_urls.append(src) # добавление ссылки в массив
@@ -57,29 +58,26 @@ def fetch_images(max_images = 10):
     for element in elements:
         if len(image_urls) >= max_images:
             break
-        try:
-            element.click() # нажатие на каритнку
-            time.sleep(1)
-            add_src()
 
-            # похожие изображения
-            div_element = driver.find_element(By.CLASS_NAME, 'FUJHTc') # группа с похожими изображениями
-            similar_img = div_element.find_elements(By.CLASS_NAME, 'rg_i') # похожие изображения
-            similar_img[0].click() # нажатие на похожую картинку
-            add_src()
-            
-            # кнопка следующего изображения
-            next_button = wait.until(EC.visibility_of_element_located((By.XPATH, "(//button[contains(@class, 'iM6qI')])[2]")))
-            
-            for i in range(0, len(similar_img)):
-                try:
-                    next_button.click() # следующее изображение
-                    add_src()
-                except Exception:
-                    continue
-        except:
-            add_src(element)
-            continue
+        element.click() # нажатие на картинку
+        time.sleep(1)
+        add_src()
+
+        # похожие изображения
+        div_element = driver.find_element(By.CLASS_NAME, 'FUJHTc') # группа с похожими изображениями
+        similar_img = div_element.find_elements(By.CLASS_NAME, 'rg_i') # похожие изображения
+        similar_img[0].click() # нажатие на похожую картинку
+        add_src()
+        
+        # кнопка следующего изображения
+        next_button = wait.until(EC.visibility_of_element_located((By.XPATH, "(//button[contains(@class, 'iM6qI')])[2]")))
+        
+        for i in range(0, len(similar_img)):
+            try:
+                next_button.click() # следующее изображение
+                add_src()
+            except Exception:
+                continue
     
     driver.quit()
     return image_urls
