@@ -32,6 +32,14 @@ def fetch_images(max_images = 10):
     image_urls = []
     driver.get(URL)
 
+    def add_src(element = None):
+        if not element:
+            img = wait.until(EC.visibility_of_element_located((By.CLASS_NAME, 'iPVvYb' if 'iPVvYb' else 'sFlh5c')))
+        else: img = element
+        src = img.get_attribute('src')
+        if src not in image_urls:
+            image_urls.append(src)
+
     while len(elements) < max_images/3:
         scroll_page()
         time.sleep(1)
@@ -43,31 +51,24 @@ def fetch_images(max_images = 10):
         try:
             element.click()
             time.sleep(1)
-            img = wait.until(EC.visibility_of_element_located((By.CLASS_NAME, 'iPVvYb' if 'iPVvYb' else 'sFlh5c')))
-            src = img.get_attribute('src')
-            if src not in image_urls:
-                image_urls.append(src)
+            add_src()
 
-            div_element = driver.find_element(By.CLASS_NAME, 'FUJHTc')
-            similar_img = div_element.find_elements(By.CLASS_NAME, 'rg_i')
+            # похожие изображения
+            div_element = driver.find_element(By.CLASS_NAME, 'FUJHTc') # группа с похожими изображениями
+            similar_img = div_element.find_elements(By.CLASS_NAME, 'rg_i') # похожие изображения
             similar_img[0].click()
-            button = wait.until(EC.visibility_of_element_located((By.XPATH, "(//button[contains(@class, 'iM6qI')])[2]")))
+            add_src()
+            
+            next_button = wait.until(EC.visibility_of_element_located((By.XPATH, "(//button[contains(@class, 'iM6qI')])[2]")))
+            
             for i in range(0, len(similar_img)):
                 try:
-                    button.click()
-
-                    test1 = wait.until(EC.visibility_of_element_located((By.CLASS_NAME, 'iPVvYb' if 'iPVvYb' else 'sFlh5c')))
-                    src = test1.get_attribute('src')
-                    if src not in image_urls:
-                        image_urls.append(src)
-
-                except Exception as e:
-                    print("Error:", e)
+                    next_button.click()
+                    add_src()
+                except Exception:
                     continue
         except:
-            src = element.get_attribute('src')
-            if src not in image_urls:
-                image_urls.append(src)
+            add_src(element)
             continue
     
     driver.quit()
@@ -90,5 +91,4 @@ def download_images(images_urls):
         download_image(src, index)
 
 img_urls = fetch_images(MAX_IMAGES)
-print(img_urls)
 download_images(img_urls)
